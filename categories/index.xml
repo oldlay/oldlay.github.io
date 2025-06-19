@@ -2,57 +2,57 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>Categories on 欧德雷-oldlay</title>
-        <link>http://localhost:1313/categories/</link>
+        <link>https://oldlay.github.io/categories/</link>
         <description>Recent content in Categories on 欧德雷-oldlay</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
         <copyright>欧德雷-oldlay</copyright>
-        <lastBuildDate>Thu, 19 Jun 2025 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/categories/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Thu, 19 Jun 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://oldlay.github.io/categories/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>文学</title>
-        <link>http://localhost:1313/categories/%E6%96%87%E5%AD%A6/</link>
+        <link>https://oldlay.github.io/categories/%E6%96%87%E5%AD%A6/</link>
         <pubDate>Thu, 19 Jun 2025 00:00:00 +0000</pubDate>
         
-        <guid>http://localhost:1313/categories/%E6%96%87%E5%AD%A6/</guid>
-        <description>&lt;img src="http://localhost:1313/categories/%E6%96%87%E5%AD%A6/books.jpg" alt="Featured image of post 文学" /&gt;</description>
+        <guid>https://oldlay.github.io/categories/%E6%96%87%E5%AD%A6/</guid>
+        <description>&lt;img src="https://oldlay.github.io/categories/%E6%96%87%E5%AD%A6/books.jpg" alt="Featured image of post 文学" /&gt;</description>
         </item>
         <item>
         <title>Test</title>
-        <link>http://localhost:1313/categories/test/</link>
+        <link>https://oldlay.github.io/categories/test/</link>
         <pubDate>Wed, 09 Sep 2020 00:00:00 +0000</pubDate>
         
-        <guid>http://localhost:1313/categories/test/</guid>
-        <description>&lt;img src="http://localhost:1313/categories/test/hutomo-abrianto-l2jk-uxb1BY-unsplash.jpg" alt="Featured image of post Test" /&gt;</description>
+        <guid>https://oldlay.github.io/categories/test/</guid>
+        <description>&lt;img src="https://oldlay.github.io/categories/test/hutomo-abrianto-l2jk-uxb1BY-unsplash.jpg" alt="Featured image of post Test" /&gt;</description>
         </item>
         <item>
         <title>测试</title>
-        <link>http://localhost:1313/categories/%E6%B5%8B%E8%AF%95/</link>
+        <link>https://oldlay.github.io/categories/%E6%B5%8B%E8%AF%95/</link>
         <pubDate>Wed, 09 Sep 2020 00:00:00 +0000</pubDate>
         
-        <guid>http://localhost:1313/categories/%E6%B5%8B%E8%AF%95/</guid>
+        <guid>https://oldlay.github.io/categories/%E6%B5%8B%E8%AF%95/</guid>
         <description></description>
         </item>
         <item>
         <title>Syntax</title>
-        <link>http://localhost:1313/categories/syntax/</link>
+        <link>https://oldlay.github.io/categories/syntax/</link>
         <pubDate>Mon, 11 Mar 2019 00:00:00 +0000</pubDate>
         
-        <guid>http://localhost:1313/categories/syntax/</guid>
+        <guid>https://oldlay.github.io/categories/syntax/</guid>
         <description></description>
         </item>
         <item>
         <title>Themes</title>
-        <link>http://localhost:1313/categories/themes/</link>
+        <link>https://oldlay.github.io/categories/themes/</link>
         <pubDate>Mon, 11 Mar 2019 00:00:00 +0000</pubDate>
         
-        <guid>http://localhost:1313/categories/themes/</guid>
+        <guid>https://oldlay.github.io/categories/themes/</guid>
         <description></description>
         </item>
         <item>
         <title>Test With Whitespaces</title>
-        <link>http://localhost:1313/categories/test-with-whitespaces/</link>
+        <link>https://oldlay.github.io/categories/test-with-whitespaces/</link>
         <pubDate>Sat, 09 Mar 2019 00:00:00 +0000</pubDate>
         
-        <guid>http://localhost:1313/categories/test-with-whitespaces/</guid>
+        <guid>https://oldlay.github.io/categories/test-with-whitespaces/</guid>
         <description></description>
         </item>
         
