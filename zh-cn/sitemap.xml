@@ -3,7 +3,7 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://oldlay.github.io/</loc>
-    <lastmod>2025-06-20T00:00:00+00:00</lastmod>
+    <lastmod>2025-06-21T15:06:22+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -16,7 +16,7 @@
                 />
   </url><url>
     <loc>https://oldlay.github.io/categories/</loc>
-    <lastmod>2025-06-20T00:00:00+00:00</lastmod>
+    <lastmod>2025-06-21T15:06:22+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
@@ -29,7 +29,22 @@
                 />
   </url><url>
     <loc>https://oldlay.github.io/post/</loc>
-    <lastmod>2025-06-20T00:00:00+00:00</lastmod>
+    <lastmod>2025-06-21T15:06:22+08:00</lastmod>
+  </url><url>
+    <loc>https://oldlay.github.io/categories/%E8%A5%BF%E6%96%B9%E5%93%B2%E5%AD%A6%E5%8F%B2/</loc>
+    <lastmod>2025-06-21T15:06:22+08:00</lastmod>
+  </url><url>
+    <loc>https://oldlay.github.io/p/life/</loc>
+    <lastmod>2025-06-21T15:06:22+08:00</lastmod>
+  </url><url>
+    <loc>https://oldlay.github.io/categories/%E5%93%B2%E5%AD%A6/</loc>
+    <lastmod>2025-06-21T15:06:22+08:00</lastmod>
+  </url><url>
+    <loc>https://oldlay.github.io/p/modern/</loc>
+    <lastmod>2025-06-21T14:29:17+08:00</lastmod>
+  </url><url>
+    <loc>https://oldlay.github.io/p/mid-age/</loc>
+    <lastmod>2025-06-21T14:09:08+08:00</lastmod>
   </url><url>
     <loc>https://oldlay.github.io/p/castle/</loc>
     <lastmod>2025-06-20T00:00:00+00:00</lastmod>
@@ -43,16 +58,10 @@
     <loc>https://oldlay.github.io/categories/%E6%96%87%E5%AD%A6/</loc>
     <lastmod>2025-06-20T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://oldlay.github.io/categories/%E8%A5%BF%E6%96%B9%E5%93%B2%E5%AD%A6%E5%8F%B2/</loc>
-    <lastmod>2025-06-20T00:00:00+00:00</lastmod>
-  </url><url>
     <loc>https://oldlay.github.io/p/ancientgreek/</loc>
     <lastmod>2025-06-20T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://oldlay.github.io/p/introduction/</loc>
-    <lastmod>2025-06-20T00:00:00+00:00</lastmod>
-  </url><url>
-    <loc>https://oldlay.github.io/categories/%E5%93%B2%E5%AD%A6/</loc>
     <lastmod>2025-06-20T00:00:00+00:00</lastmod>
   </url><url>
     <loc>https://oldlay.github.io/p/magic-mountain/</loc>
