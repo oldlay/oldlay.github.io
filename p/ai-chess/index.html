@@ -10,7 +10,7 @@
 <meta property='og:description' content="记录一个ai象棋的项目">
 <meta property='og:url' content='https://oldlay.github.io/p/ai-chess/'>
 <meta property='og:site_name' content='欧德雷-oldlay'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2025-08-11T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2025-08-11T00:00:00&#43;00:00'/><meta property='og:image' content='https://oldlay.github.io/p/ai-chess/chess.jpg' />
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:published_time' content='2025-06-20T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2025-06-20T00:00:00&#43;00:00'/><meta property='og:image' content='https://oldlay.github.io/p/ai-chess/chess.jpg' />
 <meta name="twitter:title" content="AI-Chess">
 <meta name="twitter:description" content="记录一个ai象棋的项目"><meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:image" content='https://oldlay.github.io/p/ai-chess/chess.jpg' />
@@ -318,7 +318,8 @@
         </li>
         <li><a href="#记录一个bug">记录一个BUG</a>
           <ol>
-            <li><a href="#错误的根本原因">错误的根本原因：</a></li>
+            <li><a href="#错误的根本原因">错误的根本原因</a></li>
+            <li><a href="#解决方案">解决方案</a></li>
           </ol>
         </li>
         <li><a href="#pyqt5">PyQt5</a>
@@ -406,7 +407,7 @@
   <path d="M3 11h16" />
   <path d="M18 16.496v1.504l1 1" />
 </svg>
-                <time class="article-time--published">2025-08-11</time>
+                <time class="article-time--published">2025-06-20</time>
             </div>
         
 
@@ -422,9 +423,7 @@
     <section class="article-content">
     
     
-    <blockquote>
-<p>在我看来比较好的理解方式是，先通过阅读代码理解整体和细节，再看算法和论文会更好。</p></blockquote>
-<p>注意：有什么代码设计逻辑上解决不了的问题，尝试抽象出一个中间层或者控制器类型的东西看看能不能解决</p>
+    <p>注意：有什么代码设计逻辑上解决不了的问题，尝试抽象出一个中间层或者控制器类型的东西看看能不能解决</p>
 <p>记录一下毕设</p>
 <h2 id="环境配置">环境配置
 </h2><p>在工程目录下创建conda虚拟环境：
@@ -767,15 +766,12 @@
 </ul>
 <p><strong>父子关系的确定规则：</strong></p>
 <ol>
-<li>
-<p><strong>名称是前缀：</strong> 如果一个 Logger 的名称是另一个 Logger 名称的<strong>点分隔前缀</strong>，那么前者就是后者的父 Logger。</p>
+<li><strong>名称是前缀：</strong> 如果一个 Logger 的名称是另一个 Logger 名称的<strong>点分隔前缀</strong>，那么前者就是后者的父 Logger。
 <ul>
 <li>例如：Logger <code>'a.b'</code> 的父 Logger 是 <code>'a'</code>。Logger <code>'a'</code> 的父 Logger 是根 Logger <code>''</code>。</li>
 </ul>
 </li>
-<li>
-<p><strong>根 Logger 是所有 Logger 的祖先：</strong> 所有的具名 Logger 最终都追溯到根 Logger。</p>
-</li>
+<li><strong>根 Logger 是所有 Logger 的祖先：</strong> 所有的具名 Logger 最终都追溯到根 Logger。</li>
 </ol>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -879,7 +875,7 @@
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>关键在于<code>TypeError: cannot pickle '_thread.RLock' object Exception in thread Thread-1 (_monitor):</code>。这个错误发生在 <code>multiprocessing</code> 模块尝试<strong>序列化 (pickle)</strong> 对象以在进程间传递时。</p>
-<h4 id="错误的根本原因">错误的根本原因：
+<h4 id="错误的根本原因">错误的根本原因
 </h4><p><code>multiprocessing</code> 模块在 Windows 系统上默认使用 &ldquo;spawn&rdquo; 启动方式。当它启动一个新进程时，它需要将父进程中的一些对象<strong>序列化</strong>（使用 <code>pickle</code> 模块）并传递给子进程。</p>
 <p><code>_thread.RLock</code> 是一个<strong>递归锁 (Reentrant Lock)</strong> 对象，它通常用于线程同步。<strong><code>RLock</code> 对象是不能被 pickle 化的。</strong> 这意味着你不能直接将一个包含 <code>RLock</code> 对象的 Logger 或 Handler 实例传递给子进程。</p>
 <p>在 Windows 系统上，<code>multiprocessing</code> 模块默认使用 &ldquo;spawn&rdquo; 或 &ldquo;forkserver&rdquo; 启动方法（而不是 Unix 上的 &ldquo;fork&rdquo;）。</p>
@@ -901,11 +897,36 @@
 </div>
 </div><p><strong>原因分析：</strong></p>
 <ol>
+<li><strong><code>training_pipeline = train.TrainPipeline(...)</code>：</strong> 这一行代码在 <strong>主进程</strong> 的 <code>if __name__ == '__main__':</code> 块内执行。这意味着 <code>TrainPipeline</code> 的一个实例 <code>training_pipeline</code> 在主进程中被创建了。</li>
+<li><strong><code>TrainPipeline</code> 的 <code>__init__</code> 方法：</strong> 在 <code>TrainPipeline</code> 的 <code>__init__</code> 方法中，有以下代码：</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-Python" data-lang="Python"><span class="line"><span class="cl">    <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="bp">self</span><span class="o">.</span><span class="n">qh</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">QueueHandler</span><span class="p">(</span><span class="n">log_queue</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qh</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="bp">self</span><span class="o">.</span><span class="n">worker_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>当 <code>training_pipeline</code> 在主进程中被实例化时，<code>self.root</code> 获取的是主进程的根 Logger。虽然 <code>QueueHandler</code> 本身可以被 pickle，但 <code>logging.getLogger()</code> 获取的 <code>Logger</code> 对象（尤其是根 Logger）及其内部状态（包括可能关联的 <code>Manager</code> 对象），在某些情况下可能包含<strong>不可 pickle 的内部锁对象</strong>（例如 <code>_thread.RLock</code>）。
+3. <strong><code>target=training_pipeline.run</code>：</strong> 当将一个<strong>实例方法</strong>（<code>training_pipeline.run</code>）作为 <code>Process</code> 的 <code>target</code> 时，<code>multiprocessing</code> 模块会隐式地尝试序列化 <code>training_pipeline</code> 这个<strong>实例本身</strong>，以便在子进程中重新构建它并调用其 <code>run</code> 方法。如果 <code>TrainPipeline</code> 实例本身被当作参数传递给 <code>Process</code>，或者 <code>run</code> 方法被当作 <code>target</code> 且 <code>self</code> 隐式传递，那么 <code>TrainPipeline</code> 实例及其所有属性（包括 <code>self.root</code> 和 <code>self.qh</code>）都将被尝试 pickle。
+- 由于 <code>training_pipeline</code> 实例在主进程中创建时，其属性（如 <code>self.root</code> 和 <code>self.qh</code>）已经关联了主进程的日志系统内部对象（可能包含 <code>RLock</code>），因此在尝试序列化 <code>training_pipeline</code> 实例时，就会遇到 <code>TypeError: cannot pickle '_thread.RLock' object</code></p>
+<h4 id="解决方案">解决方案
+</h4><p>核心思想是：<strong>所有涉及到进程间通信（如 <code>QueueHandler</code> 和 <code>QueueListener</code>）的日志配置，以及那些会在子进程中运行的类实例的创建，都应该在</strong>子进程的上下文<strong>中完成。</strong></p>
+<ol>
 <li>
-<p><strong><code>training_pipeline = train.TrainPipeline(...)</code>：</strong> 这一行代码在 <strong>主进程</strong> 的 <code>if __name__ == '__main__':</code> 块内执行。这意味着 <code>TrainPipeline</code> 的一个实例 <code>training_pipeline</code> 在主进程中被创建了。</p>
+<p><strong>创建包装函数作为 <code>Process</code> 的 <code>target</code>：</strong> 而不是直接将 <code>training_pipeline.run</code> 作为 <code>target</code>，而是创建一个新的函数，这个函数将作为 <code>Process</code> 的 <code>target</code>。在这个新函数内部，再实例化 <code>TrainPipeline</code> 和 <code>CollectPipeline</code>，并调用它们的 <code>run</code> 方法。</p>
 </li>
 <li>
-<p><strong><code>TrainPipeline</code> 的 <code>__init__</code> 方法：</strong> 在 <code>TrainPipeline</code> 的 <code>__init__</code> 方法中，有以下代码：</p>
+<p><strong>将 <code>log_queue</code> 作为参数传递：</strong> 确保 <code>log_queue</code> 被正确地作为参数传递给子进程的 <code>target</code> 函数，以便子进程能够使用它来配置自己的 <code>QueueHandler</code>。</p>
 </li>
 </ol>
 <div class="highlight"><div class="chroma">
@@ -936,78 +957,34 @@
 </span><span class="lnt">24
 </span><span class="lnt">25
 </span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span><span class="lnt">31
-</span><span class="lnt">32
-</span><span class="lnt">33
-</span><span class="lnt">34
-</span><span class="lnt">35
-</span><span class="lnt">36
-</span><span class="lnt">37
-</span><span class="lnt">38
-</span><span class="lnt">39
-</span><span class="lnt">40
-</span><span class="lnt">41
-</span><span class="lnt">42
-</span><span class="lnt">43
-</span><span class="lnt">44
-</span><span class="lnt">45
-</span><span class="lnt">46
-</span><span class="lnt">47
-</span><span class="lnt">48
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl">  <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">  <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">  <span class="bp">self</span><span class="o">.</span><span class="n">qh</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">QueueHandler</span><span class="p">(</span><span class="n">log_queue</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">  <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">qh</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">  <span class="bp">self</span><span class="o">.</span><span class="n">worker_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">  <span class="err">```</span>
-</span></span><span class="line"><span class="cl">  
-</span></span><span class="line"><span class="cl">  <span class="n">当</span> <span class="err">`</span><span class="n">training_pipeline</span><span class="err">`</span> <span class="n">在主进程中被实例化时</span><span class="err">，`</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="err">`</span> <span class="n">获取的是主进程的根</span> <span class="n">Logger</span><span class="err">。</span><span class="n">虽然</span> <span class="err">`</span><span class="n">QueueHandler</span><span class="err">`</span> <span class="n">本身可以被</span> <span class="n">pickle</span><span class="err">，</span><span class="n">但</span> <span class="err">`</span><span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="err">`</span> <span class="n">获取的</span> <span class="err">`</span><span class="n">Logger</span><span class="err">`</span> <span class="n">对象</span><span class="err">（</span><span class="n">尤其是根</span> <span class="n">Logger</span><span class="err">）</span><span class="n">及其内部状态</span><span class="err">（</span><span class="n">包括可能关联的</span> <span class="err">`</span><span class="n">Manager</span><span class="err">`</span> <span class="n">对象</span><span class="err">），</span><span class="n">在某些情况下可能包含</span><span class="o">**</span><span class="n">不可</span> <span class="n">pickle</span> <span class="n">的内部锁对象</span><span class="o">**</span><span class="err">（</span><span class="n">例如</span> <span class="err">`</span><span class="n">_thread</span><span class="o">.</span><span class="n">RLock</span><span class="err">`）。</span>
-</span></span><span class="line"><span class="cl">  
-</span></span><span class="line"><span class="cl"><span class="mf">3.</span> <span class="o">**</span><span class="err">`</span><span class="n">target</span><span class="o">=</span><span class="n">training_pipeline</span><span class="o">.</span><span class="n">run</span><span class="err">`：</span><span class="o">**</span> <span class="n">当将一个</span><span class="o">**</span><span class="n">实例方法</span><span class="o">**</span><span class="err">（`</span><span class="n">training_pipeline</span><span class="o">.</span><span class="n">run</span><span class="err">`）</span><span class="n">作为</span> <span class="err">`</span><span class="n">Process</span><span class="err">`</span> <span class="n">的</span> <span class="err">`</span><span class="n">target</span><span class="err">`</span> <span class="n">时</span><span class="err">，`</span><span class="n">multiprocessing</span><span class="err">`</span> <span class="n">模块会隐式地尝试序列化</span> <span class="err">`</span><span class="n">training_pipeline</span><span class="err">`</span> <span class="n">这个</span><span class="o">**</span><span class="n">实例本身</span><span class="o">**</span><span class="err">，</span><span class="n">以便在子进程中重新构建它并调用其</span> <span class="err">`</span><span class="n">run</span><span class="err">`</span> <span class="n">方法</span><span class="err">。</span><span class="n">如果</span> <span class="err">`</span><span class="n">TrainPipeline</span><span class="err">`</span> <span class="n">实例本身被当作参数传递给</span> <span class="err">`</span><span class="n">Process</span><span class="err">`，</span><span class="n">或者</span> <span class="err">`</span><span class="n">run</span><span class="err">`</span> <span class="n">方法被当作</span> <span class="err">`</span><span class="n">target</span><span class="err">`</span> <span class="n">且</span> <span class="err">`</span><span class="bp">self</span><span class="err">`</span> <span class="n">隐式传递</span><span class="err">，</span><span class="n">那么</span> <span class="err">`</span><span class="n">TrainPipeline</span><span class="err">`</span> <span class="n">实例及其所有属性</span><span class="err">（</span><span class="n">包括</span> <span class="err">`</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="err">`</span> <span class="n">和</span> <span class="err">`</span><span class="bp">self</span><span class="o">.</span><span class="n">qh</span><span class="err">`）</span><span class="n">都将被尝试</span> <span class="n">pickle</span><span class="err">。</span>
-</span></span><span class="line"><span class="cl">  
-</span></span><span class="line"><span class="cl">  <span class="o">-</span> <span class="n">由于</span> <span class="err">`</span><span class="n">training_pipeline</span><span class="err">`</span> <span class="n">实例在主进程中创建时</span><span class="err">，</span><span class="n">其属性</span><span class="err">（</span><span class="n">如</span> <span class="err">`</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="err">`</span> <span class="n">和</span> <span class="err">`</span><span class="bp">self</span><span class="o">.</span><span class="n">qh</span><span class="err">`）</span><span class="n">已经关联了主进程的日志系统内部对象</span><span class="err">（</span><span class="n">可能包含</span> <span class="err">`</span><span class="n">RLock</span><span class="err">`），</span><span class="n">因此在尝试序列化</span> <span class="err">`</span><span class="n">training_pipeline</span><span class="err">`</span> <span class="n">实例时</span><span class="err">，</span><span class="n">就会遇到</span> <span class="err">`</span><span class="ne">TypeError</span><span class="p">:</span> <span class="n">cannot</span> <span class="n">pickle</span> <span class="s1">&#39;_thread.RLock&#39;</span> <span class="nb">object</span><span class="err">`</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1">#### 解决方案</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="n">核心思想是</span><span class="err">：</span><span class="o">**</span><span class="n">所有涉及到进程间通信</span><span class="err">（</span><span class="n">如</span> <span class="err">`</span><span class="n">QueueHandler</span><span class="err">`</span> <span class="n">和</span> <span class="err">`</span><span class="n">QueueListener</span><span class="err">`）</span><span class="n">的日志配置</span><span class="err">，</span><span class="n">以及那些会在子进程中运行的类实例的创建</span><span class="err">，</span><span class="n">都应该在</span><span class="o">**</span><span class="n">子进程的上下文</span><span class="o">**</span><span class="n">中完成</span><span class="err">。</span><span class="o">**</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="mf">1.</span> <span class="o">**</span><span class="n">创建包装函数作为</span> <span class="err">`</span><span class="n">Process</span><span class="err">`</span> <span class="n">的</span> <span class="err">`</span><span class="n">target</span><span class="err">`：</span><span class="o">**</span> <span class="n">而不是直接将</span> <span class="err">`</span><span class="n">training_pipeline</span><span class="o">.</span><span class="n">run</span><span class="err">`</span> <span class="n">作为</span> <span class="err">`</span><span class="n">target</span><span class="err">`，</span><span class="n">而是创建一个新的函数</span><span class="err">，</span><span class="n">这个函数将作为</span> <span class="err">`</span><span class="n">Process</span><span class="err">`</span> <span class="n">的</span> <span class="err">`</span><span class="n">target</span><span class="err">`。</span><span class="n">在这个新函数内部</span><span class="err">，</span><span class="n">再实例化</span> <span class="err">`</span><span class="n">TrainPipeline</span><span class="err">`</span> <span class="n">和</span> <span class="err">`</span><span class="n">CollectPipeline</span><span class="err">`，</span><span class="n">并调用它们的</span> <span class="err">`</span><span class="n">run</span><span class="err">`</span> <span class="n">方法</span><span class="err">。</span>
-</span></span><span class="line"><span class="cl">  
-</span></span><span class="line"><span class="cl"><span class="mf">2.</span> <span class="o">**</span><span class="n">将</span> <span class="err">`</span><span class="n">log_queue</span><span class="err">`</span> <span class="n">作为参数传递</span><span class="err">：</span><span class="o">**</span> <span class="n">确保</span> <span class="err">`</span><span class="n">log_queue</span><span class="err">`</span> <span class="n">被正确地作为参数传递给子进程的</span> <span class="err">`</span><span class="n">target</span><span class="err">`</span> <span class="n">函数</span><span class="err">，</span><span class="n">以便子进程能够使用它来配置自己的</span> <span class="err">`</span><span class="n">QueueHandler</span><span class="err">`。</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="err">```</span><span class="n">python</span>
-</span></span><span class="line"><span class="cl"><span class="c1"># 为训练进程定义一个包装函数</span>
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="line"><span class="cl"><span class="c1"># 为训练进程定义一个包装函数</span>
 </span></span><span class="line"><span class="cl"><span class="c1"># main.py</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="c1"># 为训练进程定义一个包装函数</span>
 </span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">run_train_pipeline_in_process</span><span class="p">(</span><span class="n">log_queue</span><span class="p">,</span> <span class="n">init_model_path</span><span class="p">,</span> <span class="n">shared_lock</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">  <span class="s2">&#34;&#34;&#34;
-</span></span></span><span class="line"><span class="cl"><span class="s2">  此函数将在一个单独的进程中运行。
-</span></span></span><span class="line"><span class="cl"><span class="s2">  TrainPipeline 的实例化及其日志配置在此进程内部完成。
-</span></span></span><span class="line"><span class="cl"><span class="s2">  &#34;&#34;&#34;</span>
-</span></span><span class="line"><span class="cl">  <span class="c1"># 在子进程中实例化 TrainPipeline</span>
-</span></span><span class="line"><span class="cl">  <span class="n">train_pipeline</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">TrainPipeline</span><span class="p">(</span><span class="n">log_queue</span><span class="o">=</span><span class="n">log_queue</span><span class="p">,</span> <span class="n">init_model</span><span class="o">=</span><span class="n">init_model_path</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">  <span class="c1"># 调用 TrainPipeline 的 run 方法，并传入共享锁</span>
-</span></span><span class="line"><span class="cl">  <span class="n">train_pipeline</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">shared_lock</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;&#34;&#34;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    此函数将在一个单独的进程中运行。
+</span></span></span><span class="line"><span class="cl"><span class="s2">    TrainPipeline 的实例化及其日志配置在此进程内部完成。
+</span></span></span><span class="line"><span class="cl"><span class="s2">    &#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># 在子进程中实例化 TrainPipeline</span>
+</span></span><span class="line"><span class="cl">    <span class="n">train_pipeline</span> <span class="o">=</span> <span class="n">train</span><span class="o">.</span><span class="n">TrainPipeline</span><span class="p">(</span><span class="n">log_queue</span><span class="o">=</span><span class="n">log_queue</span><span class="p">,</span> <span class="n">init_model</span><span class="o">=</span><span class="n">init_model_path</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># 调用 TrainPipeline 的 run 方法，并传入共享锁</span>
+</span></span><span class="line"><span class="cl">    <span class="n">train_pipeline</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">shared_lock</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="c1"># 为数据收集进程定义一个包装函数</span>
 </span></span><span class="line"><span class="cl"><span class="k">def</span> <span class="nf">run_collect_pipeline_in_process</span><span class="p">(</span><span class="n">process_id</span><span class="p">,</span> <span class="n">init_model_path</span><span class="p">,</span> <span class="n">shared_lock</span><span class="p">,</span> <span class="n">log_queue</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">  <span class="s2">&#34;&#34;&#34;
-</span></span></span><span class="line"><span class="cl"><span class="s2">  此函数将在一个单独的进程中运行。
-</span></span></span><span class="line"><span class="cl"><span class="s2">  CollectPipeline 的实例化及其日志配置在此进程内部完成。
-</span></span></span><span class="line"><span class="cl"><span class="s2">  &#34;&#34;&#34;</span>
-</span></span><span class="line"><span class="cl">  <span class="c1"># collect.CollectPipeline 的 __init__ 方法可能也需要 log_queue</span>
-</span></span><span class="line"><span class="cl">  <span class="c1"># 如果 collect.py 也有自己的日志配置，它也应该像 train.py 一样接收 log_queue</span>
-</span></span><span class="line"><span class="cl">  <span class="c1"># 这里假设 collect.py 也会使用 QueueHandler，所以需要传入 log_queue</span>
-</span></span><span class="line"><span class="cl">  <span class="c1"># 注意：你需要修改 collect.py 的 CollectPipeline.__init__ 以接受 log_queue</span>
-</span></span><span class="line"><span class="cl">  <span class="n">collecting_pipeline</span> <span class="o">=</span> <span class="n">collect</span><span class="o">.</span><span class="n">CollectPipeline</span><span class="p">(</span><span class="n">process_id</span><span class="p">,</span> <span class="n">init_model</span><span class="o">=</span><span class="n">init_model_path</span><span class="p">,</span> <span class="n">log_queue</span><span class="o">=</span><span class="n">log_queue</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">  <span class="n">collecting_pipeline</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">shared_lock</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="s2">&#34;&#34;&#34;
+</span></span></span><span class="line"><span class="cl"><span class="s2">    此函数将在一个单独的进程中运行。
+</span></span></span><span class="line"><span class="cl"><span class="s2">    CollectPipeline 的实例化及其日志配置在此进程内部完成。
+</span></span></span><span class="line"><span class="cl"><span class="s2">    &#34;&#34;&#34;</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># collect.CollectPipeline 的 __init__ 方法可能也需要 log_queue</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># 如果 collect.py 也有自己的日志配置，它也应该像 train.py 一样接收 log_queue</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># 这里假设 collect.py 也会使用 QueueHandler，所以需要传入 log_queue</span>
+</span></span><span class="line"><span class="cl">    <span class="c1"># 注意：你需要修改 collect.py 的 CollectPipeline.__init__ 以接受 log_queue</span>
+</span></span><span class="line"><span class="cl">    <span class="n">collecting_pipeline</span> <span class="o">=</span> <span class="n">collect</span><span class="o">.</span><span class="n">CollectPipeline</span><span class="p">(</span><span class="n">process_id</span><span class="p">,</span> <span class="n">init_model</span><span class="o">=</span><span class="n">init_model_path</span><span class="p">,</span> <span class="n">log_queue</span><span class="o">=</span><span class="n">log_queue</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">collecting_pipeline</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">shared_lock</span><span class="p">)</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><h3 id="pyqt5">PyQt5
@@ -1160,17 +1137,15 @@
 </h4><h5 id="在构造函数中指定父对象-constructor-parameter">在构造函数中指定父对象 (Constructor Parameter)
 </h5><p>这是在 Qt 中确立父子关系最常见、最直接也是最推荐的方式。几乎所有继承自 <code>QObject</code> 的类，包括所有的 <code>QWidget</code> 控件，它们的构造函数都带有一个可选的 <code>parent</code> 参数。</p>
 <p><strong>语法：</strong></p>
-<p>Python</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">child_object = ChildClass(parent_object)
+<pre tabindex="0" class="chroma"><code class="language-Python" data-lang="Python"><span class="line"><span class="cl"><span class="n">child_object</span> <span class="o">=</span> <span class="n">ChildClass</span><span class="p">(</span><span class="n">parent_object</span><span class="p">)</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><strong>示例：</strong></p>
-<p>Python</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -1201,36 +1176,38 @@
 </span><span class="lnt">26
 </span><span class="lnt">27
 </span><span class="lnt">28
+</span><span class="lnt">29
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">import sys
-</span></span><span class="line"><span class="cl">from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget
+<pre tabindex="0" class="chroma"><code class="language-Python" data-lang="Python"><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kn">import</span> <span class="nn">sys</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">PyQt5.QtWidgets</span> <span class="kn">import</span> <span class="n">QApplication</span><span class="p">,</span> <span class="n">QMainWindow</span><span class="p">,</span> <span class="n">QPushButton</span><span class="p">,</span> <span class="n">QVBoxLayout</span><span class="p">,</span> <span class="n">QWidget</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">class MyWindow(QMainWindow):
-</span></span><span class="line"><span class="cl">    def __init__(self):
-</span></span><span class="line"><span class="cl">        super().__init__()
-</span></span><span class="line"><span class="cl">        self.setWindowTitle(&#34;父子关系示例&#34;)
-</span></span><span class="line"><span class="cl">        self.setGeometry(100, 100, 400, 300)
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">MyWindow</span><span class="p">(</span><span class="n">QMainWindow</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s2">&#34;父子关系示例&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">400</span><span class="p">,</span> <span class="mi">300</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">        central_widget = QWidget()
-</span></span><span class="line"><span class="cl">        self.setCentralWidget(central_widget)
-</span></span><span class="line"><span class="cl">        layout = QVBoxLayout(central_widget) # 布局管理器通常将其父部件作为参数
+</span></span><span class="line"><span class="cl">        <span class="n">central_widget</span> <span class="o">=</span> <span class="n">QWidget</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">setCentralWidget</span><span class="p">(</span><span class="n">central_widget</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">layout</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">(</span><span class="n">central_widget</span><span class="p">)</span> <span class="c1"># 布局管理器通常将其父部件作为参数</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">        # 创建一个按钮，并将其父对象设置为 central_widget
-</span></span><span class="line"><span class="cl">        self.button1 = QPushButton(&#34;按钮 1&#34;, central_widget)
-</span></span><span class="line"><span class="cl">        layout.addWidget(self.button1)
+</span></span><span class="line"><span class="cl">        <span class="c1"># 创建一个按钮，并将其父对象设置为 central_widget</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">button1</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&#34;按钮 1&#34;</span><span class="p">,</span> <span class="n">central_widget</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">button1</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">        # 创建另一个按钮，也将其父对象设置为 central_widget
-</span></span><span class="line"><span class="cl">        self.button2 = QPushButton(&#34;按钮 2&#34;)
-</span></span><span class="line"><span class="cl">        self.button2.setParent(central_widget) # 也可以这样设置，但不如构造函数直接
+</span></span><span class="line"><span class="cl">        <span class="c1"># 创建另一个按钮，也将其父对象设置为 central_widget</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">button2</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&#34;按钮 2&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">button2</span><span class="o">.</span><span class="n">setParent</span><span class="p">(</span><span class="n">central_widget</span><span class="p">)</span> <span class="c1"># 也可以这样设置，但不如构造函数直接</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">        layout.addWidget(self.button2)
+</span></span><span class="line"><span class="cl">        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">button2</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">if __name__ == &#39;__main__&#39;:
-</span></span><span class="line"><span class="cl">    app = QApplication(sys.argv)
-</span></span><span class="line"><span class="cl">    window = MyWindow()
-</span></span><span class="line"><span class="cl">    window.show()
-</span></span><span class="line"><span class="cl">    sys.exit(app.exec_())
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+</span></span><span class="line"><span class="cl">    <span class="n">app</span> <span class="o">=</span> <span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">window</span> <span class="o">=</span> <span class="n">MyWindow</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="n">window</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">())</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><strong>解释：</strong></p>
@@ -1242,17 +1219,15 @@
 <h5 id="通过-setparent-方法设置父对象">通过 <code>setParent()</code> 方法设置父对象
 </h5><p>你也可以在对象创建之后，通过调用其 <code>setParent()</code> 方法来确立或修改父子关系。</p>
 <p><strong>语法：</strong></p>
-<p>Python</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">child_object.setParent(parent_object)
+<pre tabindex="0" class="chroma"><code class="language-Python" data-lang="Python"><span class="line"><span class="cl"><span class="n">child_object</span><span class="o">.</span><span class="n">setParent</span><span class="p">(</span><span class="n">parent_object</span><span class="p">)</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><strong>示例（接上文）：</strong></p>
-<p>Python</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
@@ -1262,11 +1237,11 @@
 </span><span class="lnt">5
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl"># 创建另一个按钮，先不指定父对象
-</span></span><span class="line"><span class="cl">self.button2 = QPushButton(&#34;按钮 2&#34;)
-</span></span><span class="line"><span class="cl"># 之后再将其父对象设置为 central_widget
-</span></span><span class="line"><span class="cl">self.button2.setParent(central_widget)
-</span></span><span class="line"><span class="cl">layout.addWidget(self.button2) # 注意：布局管理器会把其添加的部件自动设为布局的父部件的子部件
+<pre tabindex="0" class="chroma"><code class="language-Python" data-lang="Python"><span class="line"><span class="cl"><span class="c1"># 创建另一个按钮，先不指定父对象</span>
+</span></span><span class="line"><span class="cl"><span class="bp">self</span><span class="o">.</span><span class="n">button2</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&#34;按钮 2&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 之后再将其父对象设置为 central_widget</span>
+</span></span><span class="line"><span class="cl"><span class="bp">self</span><span class="o">.</span><span class="n">button2</span><span class="o">.</span><span class="n">setParent</span><span class="p">(</span><span class="n">central_widget</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">button2</span><span class="p">)</span> <span class="c1"># 注意：布局管理器会把其添加的部件自动设为布局的父部件的子部件</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p><strong>需要注意的几点：</strong></p>
@@ -1280,7 +1255,7 @@
 <li><strong>可见性：</strong> 如果一个 <code>QWidget</code> 有父对象，通常它的显示会受到父对象的限制。子部件不会显示在父部件之外。</li>
 <li><strong>布局管理器：</strong> 当你使用布局管理器 (<code>QHBoxLayout</code>, <code>QVBoxLayout</code>, <code>QGridLayout</code> 等) 将控件添加到布局中时，布局管理器会自动处理控件的父子关系，通常会将布局的父部件设置为被添加控件的父部件。这也是为什么在上面的例子中，即使 <code>button2</code> 最初没有指定父对象，但通过 <code>layout.addWidget(self.button2)</code> 后，它最终也会成为 <code>central_widget</code> 的子部件。</li>
 </ul>
-<h5 id="父子关系的好处">父子关系的好处：
+<h5 id="父子关系的好处">父子关系的好处
 </h5><ol>
 <li><strong>自动内存管理：</strong> 最重要的好处是避免了内存泄漏。你不需要担心何时释放子对象，Qt 会在父对象销毁时自动清理。</li>
 <li><strong>层次结构组织：</strong> 方便管理和组织复杂的 UI 界面，形成清晰的对象树。</li>
@@ -1333,13 +1308,12 @@
 <h5 id="如何连接connecting信号和槽">如何连接（Connecting）信号和槽？
 </h5><p>使用 <code>connect()</code> 方法来建立信号与槽之间的连接。</p>
 <p><strong>基本语法：</strong></p>
-<p>Python</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt">1
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">sender</span><span class="o">.</span><span class="k">signal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">receiver</span><span class="o">.</span><span class="n">slot</span><span class="p">)</span>
+<pre tabindex="0" class="chroma"><code class="language-Python" data-lang="Python"><span class="line"><span class="cl"><span class="n">sender</span><span class="o">.</span><span class="n">signal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">receiver</span><span class="o">.</span><span class="n">slot</span><span class="p">)</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><ul>
@@ -1349,7 +1323,6 @@
 <li><code>slot</code>：接收者对象的某个槽（方法）。</li>
 </ul>
 <p><strong>示例：</strong></p>
-<p>Python</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -1374,26 +1347,26 @@
 </span><span class="lnt">20
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"><span class="line"><span class="cl">from PyQt5.QtWidgets import QApplication, QPushButton, QLabel, QVBoxLayout, QWidget
-</span></span><span class="line"><span class="cl">from PyQt5.QtCore import Qt
+<pre tabindex="0" class="chroma"><code class="language-Python" data-lang="Python"><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">PyQt5.QtWidgets</span> <span class="kn">import</span> <span class="n">QApplication</span><span class="p">,</span> <span class="n">QPushButton</span><span class="p">,</span> <span class="n">QLabel</span><span class="p">,</span> <span class="n">QVBoxLayout</span><span class="p">,</span> <span class="n">QWidget</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">PyQt5.QtCore</span> <span class="kn">import</span> <span class="n">Qt</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">app = QApplication([])
-</span></span><span class="line"><span class="cl">window = QWidget()
-</span></span><span class="line"><span class="cl">layout = QVBoxLayout()
+</span></span><span class="line"><span class="cl"><span class="n">app</span> <span class="o">=</span> <span class="n">QApplication</span><span class="p">([])</span>
+</span></span><span class="line"><span class="cl"><span class="n">window</span> <span class="o">=</span> <span class="n">QWidget</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="n">layout</span> <span class="o">=</span> <span class="n">QVBoxLayout</span><span class="p">()</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">button = QPushButton(&#34;点击我&#34;)
-</span></span><span class="line"><span class="cl">label = QLabel(&#34;你好，世界！&#34;)
-</span></span><span class="line"><span class="cl">label.setAlignment(Qt.AlignCenter)
+</span></span><span class="line"><span class="cl"><span class="n">button</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="s2">&#34;点击我&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">label</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="s2">&#34;你好，世界！&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">label</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignCenter</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"># 连接信号和槽
-</span></span><span class="line"><span class="cl"># 当 button 发出 clicked() 信号时，调用 label 的 setText() 槽
-</span></span><span class="line"><span class="cl">button.clicked.connect(lambda: label.setText(&#34;按钮被点击了！&#34;))
+</span></span><span class="line"><span class="cl"><span class="c1"># 连接信号和槽</span>
+</span></span><span class="line"><span class="cl"><span class="c1"># 当 button 发出 clicked() 信号时，调用 label 的 setText() 槽</span>
+</span></span><span class="line"><span class="cl"><span class="n">button</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">label</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&#34;按钮被点击了！&#34;</span><span class="p">))</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">layout.addWidget(button)
-</span></span><span class="line"><span class="cl">layout.addWidget(label)
-</span></span><span class="line"><span class="cl">window.setLayout(layout)
-</span></span><span class="line"><span class="cl">window.show()
-</span></span><span class="line"><span class="cl">app.exec_()
+</span></span><span class="line"><span class="cl"><span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">button</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">window</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">layout</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="n">window</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl"><span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
 </span></span></code></pre></td></tr></table>
 </div>
 </div><p>在这个例子中，<code>button</code> 是发送者，<code>clicked()</code> 是信号，<code>label</code> 是接收者，<code>setText()</code> 是槽。</p>
@@ -1420,7 +1393,6 @@
 <li><strong>在方法中发出信号</strong>：使用 <code>emit()</code> 方法发出信号。</li>
 </ol>
 <p><strong>示例：</strong></p>
-<p>Python</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre tabindex="0" class="chroma"><code><span class="lnt"> 1
@@ -1484,31 +1456,31 @@
 </span><span class="lnt">59
 </span></code></pre></td>
 <td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-gdscript3" data-lang="gdscript3"><span class="line"><span class="cl"><span class="n">from</span> <span class="n">PyQt5</span><span class="o">.</span><span class="n">QtWidgets</span> <span class="n">import</span> <span class="n">QApplication</span><span class="p">,</span> <span class="n">QWidget</span><span class="p">,</span> <span class="n">QPushButton</span><span class="p">,</span> <span class="n">QVBoxLayout</span><span class="p">,</span> <span class="n">QLabel</span>
-</span></span><span class="line"><span class="cl"><span class="n">from</span> <span class="n">PyQt5</span><span class="o">.</span><span class="n">QtCore</span> <span class="n">import</span> <span class="n">pyqtSignal</span><span class="p">,</span> <span class="n">QObject</span>
+<pre tabindex="0" class="chroma"><code class="language-Python" data-lang="Python"><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">PyQt5.QtWidgets</span> <span class="kn">import</span> <span class="n">QApplication</span><span class="p">,</span> <span class="n">QWidget</span><span class="p">,</span> <span class="n">QPushButton</span><span class="p">,</span> <span class="n">QVBoxLayout</span><span class="p">,</span> <span class="n">QLabel</span>
+</span></span><span class="line"><span class="cl"><span class="kn">from</span> <span class="nn">PyQt5.QtCore</span> <span class="kn">import</span> <span class="n">pyqtSignal</span><span class="p">,</span> <span class="n">QObject</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="n">MyEmitter</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">MyEmitter</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
 </span></span><span class="line"><span class="cl">    <span class="c1"># 声明一个自定义信号，不带参数</span>
 </span></span><span class="line"><span class="cl">    <span class="n">my_signal_no_args</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">()</span>
 </span></span><span class="line"><span class="cl">    <span class="c1"># 声明一个带一个字符串参数的信号</span>
 </span></span><span class="line"><span class="cl">    <span class="n">my_signal_with_str</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">    <span class="c1"># 声明一个带两个整数参数的信号</span>
-</span></span><span class="line"><span class="cl">    <span class="n">my_signal_with_ints</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="ne">int</span><span class="p">,</span> <span class="ne">int</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="n">my_signal_with_ints</span> <span class="o">=</span> <span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">None</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="n">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">do_something</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 </span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
 </span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Doing something...&#34;</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">my_signal_no_args</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span> <span class="c1"># 发出不带参数的信号</span>
-</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">my_signal_with_str</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">f</span><span class="s2">&#34;操作 {self.counter} 完成！&#34;</span><span class="p">)</span> <span class="c1"># 发出带字符串参数的信号</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">my_signal_with_str</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;操作 </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">counter</span><span class="si">}</span><span class="s2"> 完成！&#34;</span><span class="p">)</span> <span class="c1"># 发出带字符串参数的信号</span>
 </span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">my_signal_with_ints</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">counter</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">counter</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)</span> <span class="c1"># 发出带整数参数的信号</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="n">MyReceiver</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">None</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="n">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="k">class</span> <span class="nc">MyReceiver</span><span class="p">(</span><span class="n">QObject</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">label</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">slot_no_args</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1516,11 +1488,11 @@
 </span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;槽：不带参数的信号被触发。&#34;</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">slot_with_str</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">f</span><span class="s2">&#34;接收到消息: {message}&#34;</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&#34;槽：接收到字符串信号: {message}&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;接收到消息: </span><span class="si">{</span><span class="n">message</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;槽：接收到字符串信号: </span><span class="si">{</span><span class="n">message</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">    <span class="k">def</span> <span class="nf">slot_with_ints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num1</span><span class="p">,</span> <span class="n">num2</span><span class="p">):</span>
-</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&#34;槽：接收到两个整数信号: {num1}, {num2}&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;槽：接收到两个整数信号: </span><span class="si">{</span><span class="n">num1</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">num2</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="n">app</span> <span class="o">=</span> <span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl"><span class="n">window</span> <span class="o">=</span> <span class="n">QWidget</span><span class="p">()</span>
