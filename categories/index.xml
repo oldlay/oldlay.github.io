@@ -7,7 +7,23 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
         <copyright>欧德雷-oldlay</copyright>
-        <lastBuildDate>Sat, 21 Jun 2025 15:06:22 +0800</lastBuildDate><atom:link href="https://oldlay.github.io/categories/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Mon, 11 Aug 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://oldlay.github.io/categories/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>CS</title>
+        <link>https://oldlay.github.io/categories/cs/</link>
+        <pubDate>Mon, 11 Aug 2025 00:00:00 +0000</pubDate>
+        
+        <guid>https://oldlay.github.io/categories/cs/</guid>
+        <description>&lt;img src="https://oldlay.github.io/categories/cs/pexels-wendywei-3959986.jpg" alt="Featured image of post CS" /&gt;</description>
+        </item>
+        <item>
+        <title>CS61A</title>
+        <link>https://oldlay.github.io/categories/cs61a/</link>
+        <pubDate>Mon, 11 Aug 2025 00:00:00 +0000</pubDate>
+        
+        <guid>https://oldlay.github.io/categories/cs61a/</guid>
+        <description>&lt;img src="https://oldlay.github.io/categories/cs61a/Lambda.svg" alt="Featured image of post CS61A" /&gt;</description>
+        </item>
+        <item>
         <title>西方哲学史</title>
         <link>https://oldlay.github.io/categories/%E8%A5%BF%E6%96%B9%E5%93%B2%E5%AD%A6%E5%8F%B2/</link>
         <pubDate>Sat, 21 Jun 2025 15:06:22 +0800</pubDate>
@@ -69,14 +85,6 @@
         <pubDate>Mon, 11 Mar 2019 00:00:00 +0000</pubDate>
         
         <guid>https://oldlay.github.io/categories/themes/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>Test With Whitespaces</title>
-        <link>https://oldlay.github.io/categories/test-with-whitespaces/</link>
-        <pubDate>Sat, 09 Mar 2019 00:00:00 +0000</pubDate>
-        
-        <guid>https://oldlay.github.io/categories/test-with-whitespaces/</guid>
         <description></description>
         </item>
         
